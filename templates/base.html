@@ -25,12 +25,11 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32"
-          href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
+          href="{{ url_for('static', filename='favicon/favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16"
-          href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180"
-          href="{{ url_for('static', filename='favicon/apple-icon.png') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='favicon/manifest.json') }}">
+          href="{{ url_for('static', filename='favicon/favicon-16.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96"
+          href="{{ url_for('static', filename='favicon/favicon-96.png') }}">
 
     <title>{% block title %}{% endblock %}</title>
     {% endblock %}
@@ -38,20 +37,20 @@
 <body>
 {% block bgimage %}{% endblock %}
 
-<nav class="navbar navbar-expand navbar-dark bg-dark justify-content-between">
+<nav class="navbar navbar-expand navbar-light bg-light justify-content-between">
     <ul class="navbar-nav">
         <a class="navbar-brand" href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/horyzn_white.svg') }}" alt="horyzn.io">
-            <p class="brand-text">Finances</p>
+            <img class="brand-img" src="{{ url_for('static', filename='favicon/favicon-96.png') }}" alt="ShirtBase">
+            <p class="brand-text">ShirtBase</p>
         </a>
-
+        <div style="width: 2rem;"></div>
         {% if current_user.is_authenticated %}
             {% if current_user.is_admin %}
             <li class="nav-item my-auto mx-1">
                 <a class="nav-link text-center" href="{{ url_for('users') }}">Users</a>
             </li>
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('register') }}">Neuer User</a>
+                <a class="nav-link text-center" href="{{ url_for('new_article') }}">New Article</a>
             </li>
             {% endif %}
         <li class="nav-item my-auto mx-1">
@@ -59,7 +58,7 @@
         </li>
         {% else %}
         <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('login') }}">Login</a>
+            <a class="nav-link text-center" href="{{ url_for('register') }}">Register</a>
         </li>
         {% endif %}
 
@@ -67,9 +66,27 @@
     <ul class="navbar-nav">
         {% if current_user.is_authenticated %}
         <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('logout') }}">Logout</a>
+            <a class="nav-link text-center" href="{{ url_for('profile') }}">
+                <i class="fa-solid fa-user"></i>
+            </a>
+        </li>
+        <li class="nav-item my-auto mx-1">
+            <a class="nav-link text-center" href="{{ url_for('logout') }}">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="nav-item my-auto mx-1">
+            <a class="nav-link text-center" href="{{ url_for('login') }}">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </a>
         </li>
         {% endif %}
+        <li class="nav-item my-auto mx-1">
+            <a class="nav-link text-center" href="{{ url_for('checkout') }}">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </a>
+        </li>
     </ul>
 </nav>
 
@@ -83,7 +100,7 @@
         <i class="social-icon fa-brands fa-linkedin fa-lg"></i>
         <i class="social-icon fa-brands fa-xing fa-lg"></i>
     </div>-->
-    <div class="copyright-text">© 2023 Eddy Wi</div>
+    <div class="copyright-block"><p class="copyright-text">© 2023 Eddy Wi</p></div>
 </footer>
 
 {% block scripts %}
