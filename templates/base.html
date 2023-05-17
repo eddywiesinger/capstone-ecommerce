@@ -37,7 +37,7 @@
 <body>
 {% block bgimage %}{% endblock %}
 
-<nav class="navbar navbar-expand navbar-light bg-light justify-content-between">
+<nav class="navbar navbar-expand nav-custom navbar-light bg-light justify-content-between">
     <ul class="navbar-nav">
         <a class="navbar-brand" href="{{ url_for('home') }}">
             <img class="brand-img" src="{{ url_for('static', filename='favicon/favicon-96.png') }}" alt="ShirtBase">
@@ -93,7 +93,8 @@
 <div class="block-content block-custom text-center text-lg-start mb-4">
     {% block content %}{% endblock %}
 </div>
-<footer class="text-center text-lg-start bg-dark text-muted">
+<div style="height: 100px;"></div>
+<footer class="text-center text-lg-start bg-light text-muted">
 <!--    <div class="social-icons">
         <i class="social-icon fa-brands fa-facebook-f fa-lg"></i>
         <i class="social-icon fa-brands fa-instagram fa-lg"></i>

@@ -1,19 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Monda:wght@400;700&display=swap');
 
 body {
-    font-family: 'Vina Sans', sans-serif;
+    font-family: 'Monda', sans-serif;
     text-align: left
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bungee', cursive;
+}
+
 footer {
-  position: fixed;
   left: 0;
   bottom: 0;
   height: 50px;
   width: 100%;
 }
 
+.btn-primary, .btn-primary:active, .btn-primary:visited {
+    background-color: #23794d !important;
+    border-color: #23794d !important;
+    border: solid 0px !important;
+}
+
+.btn-primary:hover {
+    background-color: #20c66b !important;
+}
+
 .brand-text {
+    font-family: 'Vina Sans', sans-serif;
     text-align: center;
     padding: 0;
     margin: 0;
@@ -29,7 +45,12 @@ footer {
 }
 
 .nav-link {
+    font-family: 'Bungee', cursive;
     font-size: 1.8rem;
+}
+
+.block-custom {
+    font-family: 'Monda', sans-serif;
 }
 
 .submit-container {
@@ -38,6 +59,18 @@ footer {
 
 .small-text {
     font-size: 0.8rem;
+}
+
+.article-title {
+    font-family: 'Bungee', cursive;
+}
+
+.article-description {
+    font-family: 'Monda', cursive;
+}
+
+.article-price {
+    font-family: 'Bungee', cursive;
 }
 
 .copyright-block {

@@ -171,7 +171,7 @@ def checkout():
     return redirect(url_for('home'))
 
 
-@application.route('/new-article', methods=['GET', 'POST'])
+@application.route('/article/new', methods=['GET', 'POST'])
 @admin_required
 def new_article():
     if request.method == 'POST':
@@ -193,7 +193,6 @@ def new_article():
             if upload_result.get('public_id'):
                 new_public_id = upload_result.get('public_id')
                 secure_url = upload_result.get('secure_url')
-                # TODO: Transform
                 url, options = cloudinary_url(new_public_id, width=150, height=150, crop="fill")
                 transformed_url = url
         new_article = Article(
@@ -213,6 +212,61 @@ def new_article():
 
         return redirect(url_for('home'))
     return render_template('admin/new_article.html')
+
+
+@application.route('/articles')
+@admin_required
+def articles():
+    return render_template('admin/articles.html', articles=Article.query.all())
+
+
+@application.route('/article/<article_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_article(article_id):
+    article_to_edit = Article.query.get(int(article_id))
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        price = request.form.get('price')
+        image_file = request.files.get('image_file')
+        found_article = Article.query.filter_by(name=name).first()
+        if found_article:
+            flash('Article name exists already', 'warning')
+            return redirect(url_for('edit_article'))
+
+        new_public_id = ''
+        secure_url = ''
+        transformed_url = ''
+        if image_file:
+            upload_result = cloudinary.uploader.upload(image_file)
+            application.logger.info(upload_result)
+            if upload_result.get('public_id'):
+                new_public_id = upload_result.get('public_id')
+                secure_url = upload_result.get('secure_url')
+                url, options = cloudinary_url(new_public_id, width=150, height=150, crop="fill")
+                transformed_url = url
+                # delete old image from cloudinary
+                if article_to_edit.cloudinary_public_id:
+                    cloudinary.uploader.destroy(article_to_edit.cloudinary_public_id, invalidate=True)
+        if name:
+            article_to_edit.name = name
+        if description:
+            article_to_edit.description = description
+        if price:
+            article_to_edit.price = price
+        if new_public_id:
+            article_to_edit.cloudinary_public_id = new_public_id
+        if secure_url:
+            article_to_edit.cloudinary_secure_url = secure_url
+        if transformed_url:
+            article_to_edit.cloudinary_transformed_url = transformed_url
+
+        db.session.commit()
+
+        flash('Article was updated successfully!', 'success')
+
+        return redirect(url_for('home'))
+    return render_template('admin/edit_article.html', article=article_to_edit)
 
 
 if __name__ == '__main__':
