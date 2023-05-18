@@ -52,10 +52,10 @@
             <li class="nav-item my-auto mx-1">
                 <a class="nav-link text-center" href="{{ url_for('new_article') }}">New Article</a>
             </li>
+            <li class="nav-item my-auto mx-1">
+                <a class="nav-link text-center" href="{{ url_for('articles') }}">Articles</a>
+            </li>
             {% endif %}
-        <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('reset_password') }}">Passwort ändern</a>
-        </li>
         {% else %}
         <li class="nav-item my-auto mx-1">
             <a class="nav-link text-center" href="{{ url_for('register') }}">Register</a>

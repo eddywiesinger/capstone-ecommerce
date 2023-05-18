@@ -81,12 +81,6 @@ def home():
     return render_template('home.html', articles=Article.query.all())
 
 
-@application.route('/users')
-def users():
-    flash('Users route under construction', 'danger')
-    return redirect(url_for('home'))
-
-
 @application.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -267,6 +261,17 @@ def edit_article(article_id):
 
         return redirect(url_for('home'))
     return render_template('admin/edit_article.html', article=article_to_edit)
+
+
+@application.route('/unauthorized')
+@login_required
+def unauthorized():
+    return render_template('error/unauthorized.html')
+
+@application.route('/users')
+@admin_required
+def users():
+    return render_template('admin/users.html', users=User.query.all())
 
 
 if __name__ == '__main__':
