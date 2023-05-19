@@ -263,6 +263,20 @@ def edit_article(article_id):
     return render_template('admin/edit_article.html', article=article_to_edit)
 
 
+@application.route('/article/delete/<article_id>')
+@admin_required
+def delete_article(article_id):
+    article_to_delete = Article.query.get(int(article_id))
+    if article_to_delete.cloudinary_public_id:
+        cloudinary.uploader.destroy(article_to_delete.cloudinary_public_id, invalidate=True)
+
+    db.session.delete(article_to_delete)
+    db.session.commit()
+
+    flash('Article was deleted successfully!', 'success')
+    return redirect(url_for('home'))
+
+
 @application.route('/unauthorized')
 @login_required
 def unauthorized():

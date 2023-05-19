@@ -4,11 +4,16 @@
 
 body {
     font-family: 'Monda', sans-serif;
-    text-align: left
+    text-align: left;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Bungee', cursive;
+    margin: 0;
+    color: #23794d;
 }
 
 footer {
@@ -18,7 +23,22 @@ footer {
   width: 100%;
 }
 
+.block-custom {
+    font-family: 'Monda', sans-serif;
+    flex: 1;
+}
+
+.block-custom a {
+    color: #23794d;
+}
+
+.block-custom a:hover {
+    color: #20c66b;
+}
+
+
 .btn-primary, .btn-primary:active, .btn-primary:visited {
+    color: #fff !important;
     background-color: #23794d !important;
     border-color: #23794d !important;
     border: solid 0px !important;
@@ -26,6 +46,14 @@ footer {
 
 .btn-primary:hover {
     background-color: #20c66b !important;
+}
+
+.btn-secondary {
+    color: #fff !important;
+}
+
+.btn-danger {
+    color: #fff !important;
 }
 
 .brand-text {
@@ -37,6 +65,12 @@ footer {
     color: #23794d;
 }
 
+.jumbotron {
+    background-color: transparent;
+    border-bottom: 4px solid #23794d;
+    border-radius: 0;
+}
+
 .brand-img {
   display: block;
   margin-left: auto;
@@ -45,12 +79,24 @@ footer {
 }
 
 .nav-link {
-    font-family: 'Bungee', cursive;
-    font-size: 1.8rem;
+    font-family: 'Vina Sans', sans-serif;
+    font-size: 1.6rem;
 }
 
-.block-custom {
-    font-family: 'Monda', sans-serif;
+.nav-link:hover {
+    color: #23794d !important;
+}
+
+.nav-link p {
+    margin: 0;
+}
+
+.navbar-toggler {
+    min-width: 60px;
+}
+
+.navbar-toggler:hover {
+    background-color: #23794d !important;
 }
 
 .submit-container {

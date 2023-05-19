@@ -37,70 +37,89 @@
 <body>
 {% block bgimage %}{% endblock %}
 
-<nav class="navbar navbar-expand nav-custom navbar-light bg-light justify-content-between">
+<nav class="navbar navbar-expand-lg nav-custom navbar-light bg-light justify-content-between">
+    <!-- left navbar -->
+    <div class="w-100 d-flex">
     <ul class="navbar-nav">
         <a class="navbar-brand" href="{{ url_for('home') }}">
             <img class="brand-img" src="{{ url_for('static', filename='favicon/favicon-96.png') }}" alt="ShirtBase">
             <p class="brand-text">ShirtBase</p>
         </a>
-        <div style="width: 2rem;"></div>
-        {% if current_user.is_authenticated %}
+
+    </ul>
+    {% if current_user.is_admin %}
+    <button class="ml-auto navbar-toggler" type="button" data-toggle="collapse" data-target="#centeredNavbar" aria-controls="centeredNavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fa-solid fa-user"></i>
+    </button>
+    {% endif %}
+    <button class="ml-auto navbar-toggler" type="button" data-toggle="collapse" data-target="#rightNavbar" aria-controls="rightNavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    </div>
+    <!-- centered navbar -->
+    <div class="navbar-collapse collapse w-100" id="centeredNavbar">
+        <ul class="navbar-nav mx-auto">
             {% if current_user.is_admin %}
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('users') }}">Users</a>
+                <a class="nav-link text-center" href="{{ url_for('users') }}"><i class="fa-solid fa-users"></i><p>Users</p></a>
             </li>
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('new_article') }}">New Article</a>
+                <a class="nav-link text-center" href="{{ url_for('new_article') }}"><i class="fa-solid fa-plus"></i><p>New Article</p></a>
             </li>
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('articles') }}">Articles</a>
+                <a class="nav-link text-center" href="{{ url_for('articles') }}"><i class="fa-solid fa-shirt"></i><p>Articles</p></a>
             </li>
             {% endif %}
-        {% else %}
-        <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('register') }}">Register</a>
-        </li>
-        {% endif %}
-
-    </ul>
-    <ul class="navbar-nav">
-        {% if current_user.is_authenticated %}
-        <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('profile') }}">
-                <i class="fa-solid fa-user"></i>
-            </a>
-        </li>
-        <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('logout') }}">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </a>
-        </li>
-        {% else %}
-        <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('login') }}">
-                <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            </a>
-        </li>
-        {% endif %}
-        <li class="nav-item my-auto mx-1">
-            <a class="nav-link text-center" href="{{ url_for('checkout') }}">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </a>
-        </li>
-    </ul>
+        </ul>
+    </div>
+    <!-- right navbar -->
+    <div class="navbar-collapse collapse w-100" id="rightNavbar">
+        <ul class="navbar-nav ml-auto">
+            {% if current_user.is_authenticated %}
+            <li class="nav-item my-auto mx-1">
+                <a class="nav-link text-center" href="{{ url_for('profile') }}">
+                    <i class="fa-solid fa-user"></i>
+                    <p>Profile</p>
+                </a>
+            </li>
+            <li class="nav-item my-auto mx-1">
+                <a class="nav-link text-center" href="{{ url_for('logout') }}">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <p>Logout</p>
+                </a>
+            </li>
+            {% else %}
+            <li class="nav-item my-auto mx-1">
+                <a class="nav-link text-center" href="{{ url_for('register') }}"><i class="fa-solid fa-user-plus"></i>
+                    <p>Register</p></a>
+            </li>
+            <li class="nav-item my-auto mx-1">
+                <a class="nav-link text-center" href="{{ url_for('login') }}">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    <p>Login</p>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item my-auto mx-1">
+                <a class="nav-link text-center" href="{{ url_for('checkout') }}">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <p>Checkout</p>
+                </a>
+            </li>
+        </ul>
+    </div>
 </nav>
 
-<div class="block-content block-custom text-center text-lg-start mb-4">
+<div class="block-content block-custom text-center text-lg-start overflow-auto">
     {% block content %}{% endblock %}
 </div>
-<div style="height: 100px;"></div>
 <footer class="text-center text-lg-start bg-light text-muted">
-<!--    <div class="social-icons">
-        <i class="social-icon fa-brands fa-facebook-f fa-lg"></i>
-        <i class="social-icon fa-brands fa-instagram fa-lg"></i>
-        <i class="social-icon fa-brands fa-linkedin fa-lg"></i>
-        <i class="social-icon fa-brands fa-xing fa-lg"></i>
-    </div>-->
+    <!--    <div class="social-icons">
+            <i class="social-icon fa-brands fa-facebook-f fa-lg"></i>
+            <i class="social-icon fa-brands fa-instagram fa-lg"></i>
+            <i class="social-icon fa-brands fa-linkedin fa-lg"></i>
+            <i class="social-icon fa-brands fa-xing fa-lg"></i>
+        </div>-->
     <div class="copyright-block"><p class="copyright-text">© 2023 Eddy Wi</p></div>
 </footer>
 
