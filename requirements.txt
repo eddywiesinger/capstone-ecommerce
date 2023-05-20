@@ -5,3 +5,4 @@ Bootstrap-Flask==2.2.0
 Flask-Login==0.6.2
 Flask-SQLAlchemy==3.0.3
 cloudinary==1.33.0
+stripe==5.4.0

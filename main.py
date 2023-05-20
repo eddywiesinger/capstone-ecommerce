@@ -14,10 +14,20 @@ from decorators import admin_required
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 
-from uuid import uuid4
+import stripe
+
+# TODO: Remove Articles DB and refactor all article related routes to STRIPE API Calls
+# https://stripe.com/docs/api/products/update
+# https://stripe.com/docs/api/products/create
+# https://stripe.com/docs/api/products/list
+# https://stripe.com/docs/api/products/delete
+
+stripe.api_key = os.environ['STRIPE_SECRET_KEY']
+YOUR_DOMAIN = 'http://localhost:5000'
 
 application = Flask(__name__, static_folder='static')
 application.config.from_object(BaseConfig())
+
 
 # BOOTSTRAP
 Bootstrap4(application)
@@ -78,7 +88,8 @@ with application.app_context():
 
 @application.route('/')
 def home():
-    return render_template('home.html', articles=Article.query.all())
+    articles = stripe.Product.list() #Article.query.all()
+    return render_template('home.html', articles=articles)
 
 
 @application.route('/login', methods=['GET', 'POST'])
@@ -156,12 +167,6 @@ def profile():
 @login_required
 def reset_password():
     flash('Reset password route under construction', 'danger')
-    return redirect(url_for('home'))
-
-
-@application.route('/checkout')
-def checkout():
-    flash('Checkout route under construction', 'danger')
     return redirect(url_for('home'))
 
 
@@ -282,10 +287,34 @@ def delete_article(article_id):
 def unauthorized():
     return render_template('error/unauthorized.html')
 
+
 @application.route('/users')
 @admin_required
 def users():
     return render_template('admin/users.html', users=User.query.all())
+
+
+@application.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if request.method == 'POST':
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                line_items=[
+                    {
+                        # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                        'price': 'price_1N9oW6BXXPZuK6COQbRpcUei',
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url=YOUR_DOMAIN + '/success.html', # url_for('home'),
+                cancel_url=YOUR_DOMAIN + '/cancel.html', #url_for('checkout'),
+            )
+        except Exception as e:
+            return str(e)
+
+        return redirect(checkout_session.url, code=303)
+    return render_template('checkout.html')
 
 
 if __name__ == '__main__':
