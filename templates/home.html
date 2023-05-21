@@ -32,7 +32,7 @@
                         <div class="card-body">
                             <h5 class="card-title article-title">{{ article.name }}</h5>
                             <p class="card-text article-description">{{ article.description }}</p>
-                            <p class="article-price">{{ article.price }} €</p>
+                            <p class="article-price">{{ article.price_amount }} €</p>
                             <a href="#" class="btn btn-primary">Add To Chart</a>
                             {% if current_user.is_admin %}
                             <div class="mt-2">

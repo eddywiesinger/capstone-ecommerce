@@ -16,10 +16,7 @@ from cloudinary.utils import cloudinary_url
 
 import stripe
 
-# TODO: Remove Articles DB and refactor all article related routes to STRIPE API Calls
-# https://stripe.com/docs/api/products/update
-# https://stripe.com/docs/api/products/create
-# https://stripe.com/docs/api/products/list
+# TODO: Delete Product Route missing
 # https://stripe.com/docs/api/products/delete
 
 stripe.api_key = os.environ['STRIPE_SECRET_KEY']
@@ -27,7 +24,6 @@ YOUR_DOMAIN = 'http://localhost:5000'
 
 application = Flask(__name__, static_folder='static')
 application.config.from_object(BaseConfig())
-
 
 # BOOTSTRAP
 Bootstrap4(application)
@@ -70,16 +66,16 @@ class User(db.Model, UserMixin):
     confirmed_on = db.Column(db.DateTime, nullable=True)
 
 
-class Article(db.Model):
-    __tablename__ = "articles"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(250), unique=True, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    cloudinary_public_id = db.Column(db.String(500))
-    cloudinary_secure_url = db.Column(db.String(500))
-    cloudinary_transformed_url = db.Column(db.String(500))
-    description = db.Column(db.Text)
-    created_on = db.Column(db.DateTime, nullable=False)
+# class Article(db.Model):
+#     __tablename__ = "articles"
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(250), unique=True, nullable=False)
+#     price = db.Column(db.Float, nullable=False)
+#     cloudinary_public_id = db.Column(db.String(500))
+#     cloudinary_secure_url = db.Column(db.String(500))
+#     cloudinary_transformed_url = db.Column(db.String(500))
+#     description = db.Column(db.Text)
+#     created_on = db.Column(db.DateTime, nullable=False)
 
 
 with application.app_context():
@@ -88,8 +84,12 @@ with application.app_context():
 
 @application.route('/')
 def home():
-    articles = stripe.Product.list() #Article.query.all()
-    return render_template('home.html', articles=articles)
+    all_products = stripe.Product.list()
+    for product in all_products:
+        if product.default_price:
+            price = stripe.Price.retrieve(product.default_price)
+            product.price_amount = price.unit_amount_decimal
+    return render_template('home.html', articles=all_products)  # Article.query.all()
 
 
 @application.route('/login', methods=['GET', 'POST'])
@@ -178,34 +178,22 @@ def new_article():
         description = request.form.get('description')
         price = request.form.get('price')
         image_file = request.files.get('image_file')
-        found_article = Article.query.filter_by(name=name).first()
-        if found_article:
-            flash('Article name exists already', 'warning')
-            return redirect(url_for('new_article'))
-
-        new_public_id = ''
-        secure_url = ''
-        transformed_url = ''
+        url = ''
         if image_file:
-            upload_result = cloudinary.uploader.upload(image_file)
-            application.logger.info(upload_result)
-            if upload_result.get('public_id'):
-                new_public_id = upload_result.get('public_id')
-                secure_url = upload_result.get('secure_url')
-                url, options = cloudinary_url(new_public_id, width=150, height=150, crop="fill")
-                transformed_url = url
-        new_article = Article(
+            file_obj = stripe.File.create(
+                file=image_file,
+                purpose='dispute_evidence',
+            )
+            url = file_obj.url
+        stripe.Product.create(
             name=name,
             description=description,
-            price=price,
-            cloudinary_public_id=new_public_id,
-            cloudinary_secure_url=secure_url,
-            cloudinary_transformed_url=transformed_url,
-            created_on=datetime.now()
+            default_price_data={
+                'currency': 'EUR',
+                'unit_amount_decimal': price
+            },
+            images=[url]
         )
-
-        db.session.add(new_article)
-        db.session.commit()
 
         flash('Article was added successfully!', 'success')
 
@@ -216,51 +204,68 @@ def new_article():
 @application.route('/articles')
 @admin_required
 def articles():
-    return render_template('admin/articles.html', articles=Article.query.all())
+    all_products = stripe.Product.list()
+    for product in all_products:
+        if product.default_price:
+            price = stripe.Price.retrieve(product.default_price)
+            product.price_amount = price.unit_amount_decimal
+    return render_template('admin/articles.html', articles=all_products)  # Article.query.all()
 
 
 @application.route('/article/<article_id>', methods=['GET', 'POST'])
 @admin_required
 def edit_article(article_id):
-    article_to_edit = Article.query.get(int(article_id))
+    article_to_edit = stripe.Product.retrieve(article_id)  # Article.query.get(int(article_id))
+    current_price = stripe.Price.retrieve(article_to_edit.default_price)
+    article_to_edit.price_amount = current_price.unit_amount_decimal
     if request.method == 'POST':
         name = request.form.get('name')
         description = request.form.get('description')
         price = request.form.get('price')
         image_file = request.files.get('image_file')
-        found_article = Article.query.filter_by(name=name).first()
-        if found_article:
-            flash('Article name exists already', 'warning')
-            return redirect(url_for('edit_article'))
 
-        new_public_id = ''
-        secure_url = ''
-        transformed_url = ''
-        if image_file:
-            upload_result = cloudinary.uploader.upload(image_file)
-            application.logger.info(upload_result)
-            if upload_result.get('public_id'):
-                new_public_id = upload_result.get('public_id')
-                secure_url = upload_result.get('secure_url')
-                url, options = cloudinary_url(new_public_id, width=150, height=150, crop="fill")
-                transformed_url = url
-                # delete old image from cloudinary
-                if article_to_edit.cloudinary_public_id:
-                    cloudinary.uploader.destroy(article_to_edit.cloudinary_public_id, invalidate=True)
         if name:
-            article_to_edit.name = name
+            stripe.Product.modify(
+                article_id,
+                name=name)
         if description:
-            article_to_edit.description = description
+            stripe.Product.modify(
+                article_id,
+                description=description
+            )
         if price:
-            article_to_edit.price = price
-        if new_public_id:
-            article_to_edit.cloudinary_public_id = new_public_id
-        if secure_url:
-            article_to_edit.cloudinary_secure_url = secure_url
-        if transformed_url:
-            article_to_edit.cloudinary_transformed_url = transformed_url
-
-        db.session.commit()
+            deactivate_old_price = False
+            if article_to_edit.default_price:
+                deactivate_old_price = True
+            created_price = stripe.Price.create(
+                product=article_id,
+                currency='EUR',
+                unit_amount_decimal=price
+            )
+            stripe.Product.modify(
+                article_id,
+                default_price=created_price
+            )
+            if deactivate_old_price:
+                stripe.Price.modify(
+                    article_to_edit.default_price,
+                    active=False
+                )
+        if image_file:
+            url = ''
+            if image_file:
+                file_obj = stripe.File.create(
+                    file=image_file,
+                    purpose='dispute_evidence',
+                    file_link_data={
+                        'create': True
+                    }
+                )
+                url = file_obj.links.data[0].url
+                stripe.Product.modify(
+                    article_id,
+                    images=[url]
+                )
 
         flash('Article was updated successfully!', 'success')
 
@@ -271,12 +276,7 @@ def edit_article(article_id):
 @application.route('/article/delete/<article_id>')
 @admin_required
 def delete_article(article_id):
-    article_to_delete = Article.query.get(int(article_id))
-    if article_to_delete.cloudinary_public_id:
-        cloudinary.uploader.destroy(article_to_delete.cloudinary_public_id, invalidate=True)
-
-    db.session.delete(article_to_delete)
-    db.session.commit()
+    stripe.Product.delete(article_id)
 
     flash('Article was deleted successfully!', 'success')
     return redirect(url_for('home'))
@@ -307,8 +307,8 @@ def checkout():
                     },
                 ],
                 mode='payment',
-                success_url=YOUR_DOMAIN + '/success.html', # url_for('home'),
-                cancel_url=YOUR_DOMAIN + '/cancel.html', #url_for('checkout'),
+                success_url=YOUR_DOMAIN + '/success.html',  # url_for('home'),
+                cancel_url=YOUR_DOMAIN + '/cancel.html',  # url_for('checkout'),
             )
         except Exception as e:
             return str(e)
