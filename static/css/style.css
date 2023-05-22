@@ -128,3 +128,22 @@ footer {
     position: relative;
     top: 25%
 }
+
+.chart-count-container {
+    position: absolute;
+    z-index: 1;
+    background-color: rgba(183,4, 4, 0.7);
+    border-radius: 100%;
+    width: 1.8rem;
+    height: 1.8rem;
+    transform: translate(20px, -40px);
+
+}
+
+.chart-count {
+    font-family: 'Monda', sans-serif;
+    color: #fff;
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 0.4rem !important;
+}

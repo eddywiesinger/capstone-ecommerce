@@ -40,34 +40,39 @@
 <nav class="navbar navbar-expand-lg nav-custom navbar-light bg-light justify-content-between">
     <!-- left navbar -->
     <div class="w-100 d-flex">
-    <ul class="navbar-nav">
-        <a class="navbar-brand" href="{{ url_for('home') }}">
-            <img class="brand-img" src="{{ url_for('static', filename='favicon/favicon-96.png') }}" alt="ShirtBase">
-            <p class="brand-text">ShirtBase</p>
-        </a>
+        <ul class="navbar-nav">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img class="brand-img" src="{{ url_for('static', filename='favicon/favicon-96.png') }}" alt="ShirtBase">
+                <p class="brand-text">ShirtBase</p>
+            </a>
 
-    </ul>
-    {% if current_user.is_admin %}
-    <button class="ml-auto navbar-toggler" type="button" data-toggle="collapse" data-target="#centeredNavbar" aria-controls="centeredNavbar" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fa-solid fa-user"></i>
-    </button>
-    {% endif %}
-    <button class="ml-auto navbar-toggler" type="button" data-toggle="collapse" data-target="#rightNavbar" aria-controls="rightNavbar" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+        </ul>
+        {% if current_user.is_admin %}
+        <button class="ml-auto navbar-toggler" type="button" data-toggle="collapse" data-target="#centeredNavbar"
+                aria-controls="centeredNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fa-solid fa-user"></i>
+        </button>
+        {% endif %}
+        <button class="ml-auto navbar-toggler" type="button" data-toggle="collapse" data-target="#rightNavbar"
+                aria-controls="rightNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
     </div>
     <!-- centered navbar -->
     <div class="navbar-collapse collapse w-100" id="centeredNavbar">
         <ul class="navbar-nav mx-auto">
             {% if current_user.is_admin %}
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('users') }}"><i class="fa-solid fa-users"></i><p>Users</p></a>
+                <a class="nav-link text-center" href="{{ url_for('users') }}"><i class="fa-solid fa-users"></i>
+                    <p>Users</p></a>
             </li>
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('new_article') }}"><i class="fa-solid fa-plus"></i><p>New Article</p></a>
+                <a class="nav-link text-center" href="{{ url_for('new_article') }}"><i class="fa-solid fa-plus"></i>
+                    <p>New Article</p></a>
             </li>
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('articles') }}"><i class="fa-solid fa-shirt"></i><p>Articles</p></a>
+                <a class="nav-link text-center" href="{{ url_for('articles') }}"><i class="fa-solid fa-shirt"></i>
+                    <p>Articles</p></a>
             </li>
             {% endif %}
         </ul>
@@ -102,7 +107,13 @@
             {% endif %}
             <li class="nav-item my-auto mx-1">
                 <a class="nav-link text-center" href="{{ url_for('checkout') }}">
-                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-cart-shopping">
+                        {% if current_user.is_authenticated %}
+                        <div class="chart-count-container">
+                            <p class="chart-count">{{ current_user.products|length }}</p>
+                        </div>
+                        {% endif %}
+                    </i>
                     <p>Checkout</p>
                 </a>
             </li>

@@ -18,11 +18,46 @@
             {% endfor %}
             {% endif %}
             {% endwith %}
-        <form method="POST">
+        </div>
+        <div class="col-lg-12">
+                    <form method="POST">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total Price</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Image</th>
+                    <th scope="col"><i class="fa-solid fa-trash"></i></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for article in products %}
+                <tr>
+                    <th scope="row">{{ article.id }}</th>
+                    <td>{{ article.name }}</td>
+                    <td>{{ '%0.2f' | format(article.price_amount|float)  }}</td>
+                    <td>{{ article.quantity }}</td>
+                    <td>{{ '%0.2f' | format(article.total_price|float)  }}</td>
+                    <td>{{ article.description }}</td>
+                    <td><a href="{{ article.images[0] }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+                    <td><a href="{{ url_for('remove_from_chart', article_id=article.id) }}"><i class="fa-solid fa-trash"></i></a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {%if current_user.products|length > 0 %}
             <div class="submit-container text-center">
-                <button type="submit" class="btn btn-primary btn-block">Buy</button>
+                <button type="submit" class="btn btn-primary btn-lg">Buy</button>
             </div>
+            {% else %}
+            <p>Nothing in your chart. Please add <a href="{{ url_for('home') }}">products</a> to your chart.</p>
+            {% endif %}
         </form>
+
         </div>
     </div>
 </div>
