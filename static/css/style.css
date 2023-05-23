@@ -147,3 +147,17 @@ footer {
     text-align: center;
     margin-top: 0.4rem !important;
 }
+
+.img-small-display {
+    width: 12rem;
+    height: 12rem;
+    object-fit: cover;
+    object-position: 25% 25%;
+}
+
+.img-medium-display {
+    width: 18rem;
+    height: 22rem;
+    object-fit: cover;
+    object-position: 25% 25%;
+}

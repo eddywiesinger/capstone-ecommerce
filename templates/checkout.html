@@ -43,7 +43,7 @@
                     <td>{{ article.quantity }}</td>
                     <td>{{ '%0.2f' | format(article.total_price|float)  }}</td>
                     <td>{{ article.description }}</td>
-                    <td><a href="{{ article.images[0] }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+                    <td><img class="img-small-display" src="{{ article.images[0] }}"></td>
                     <td><a href="{{ url_for('remove_from_chart', article_id=article.id) }}"><i class="fa-solid fa-trash"></i></a></td>
                 </tr>
                 {% endfor %}

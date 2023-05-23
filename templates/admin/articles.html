@@ -42,7 +42,7 @@
                     <td>{{ article.name }}</td>
                     <td>{{ '%0.2f' | format(article.price_amount|float) }}</td>
                     <td>{{ article.description }}</td>
-                    <td><a href="{{ article.images[0] }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
+                    <td><img class="img-small-display" src="{{ article.images[0] }}"></td>
                     <td><a href="{{ url_for('edit_article', article_id=article.id) }}"><i class="fa-solid fa-edit"></i></a></td>
                     <td><a href="{{ url_for('delete_article', article_id=article.id) }}" onclick="return confirm('Are you sure to delete this article?')"><i class="fa-solid fa-trash"></i></a></td>
                 </tr>
@@ -52,5 +52,5 @@
         </div>
     </div>
 </div>
-</div>
+
 {% endblock %}

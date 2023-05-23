@@ -12,13 +12,14 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from config import BaseConfig
 from decorators import admin_required
 
+import requests
+
 import stripe
 
-# TODO: Delete Product Route missing
-# https://stripe.com/docs/api/products/delete
+# TODO: Set up mailer for account activation
 
 stripe.api_key = os.environ['STRIPE_SECRET_KEY']
-YOUR_DOMAIN = 'http://localhost:5000'
+YOUR_DOMAIN = os.environ['YOUR_DOMAIN']
 
 application = Flask(__name__, static_folder='static')
 application.config.from_object(BaseConfig())
@@ -141,18 +142,49 @@ def register():
     return render_template('register.html')
 
 
-@application.route('/profile')
+@application.route('/profile/<int:user_id>', methods=['GET', 'POST', 'DELETE'])
 @login_required
-def profile():
-    flash('Profile route under construction', 'danger')
-    return redirect(url_for('home'))
+def profile(user_id):
+    if not current_user.is_admin:
+        if current_user.id != user_id:
+            return redirect(url_for('unauthorized'))
+    if request.method == 'POST':
+        name = request.form.get('name')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        user_to_update = User.query.get(user_id)
+        if name:
+            user_to_update.name = name
+        if password:
+            if password != confirm_password:
+                flash('Passwords do not match!', 'error')
+                return redirect(url_for('profile', user_id=user_id))
+            hashed_pw = generate_password_hash(password)
+            user_to_update.password = hashed_pw
+
+        db.session.commit()
+        flash('Properties were changed!', 'success')
+        return redirect(url_for('profile', user_id=user_id))
+
+    return render_template('user.html', user=User.query.get(user_id))
 
 
-@application.route('/reset-password')
+@application.route('/profile/<int:user_id>/delete', methods=['POST'])
 @login_required
-def reset_password():
-    flash('Reset password route under construction', 'danger')
-    return redirect(url_for('home'))
+def delete_profile(user_id):
+    user_to_delete = User.query.get(user_id)
+    delete_q = Product.__table__.delete() \
+        .where(Product.buyer_id == user_id)
+    db.session.execute(delete_q)
+    db.session.delete(user_to_delete)
+    db.session.commit()
+    if current_user.is_admin:
+        if current_user.id != user_id:
+            flash('User deleted.', 'success')
+            return redirect(url_for('users'))
+    flash('User deleted and logged out.', 'success')
+    return redirect(url_for('logout'))
 
 
 @application.route('/article/new', methods=['GET', 'POST'])
@@ -165,6 +197,7 @@ def new_article():
         image_file = request.files.get('image_file')
         url = ''
         if image_file:
+            image_file.name = image_file.filename
             file_obj = stripe.File.create(
                 file=image_file,
                 purpose='dispute_evidence',
@@ -238,6 +271,7 @@ def edit_article(article_id):
                     active=False
                 )
         if image_file:
+            image_file.name = image_file.filename
             file_obj = stripe.File.create(
                 file=image_file,
                 purpose='dispute_evidence',
@@ -308,8 +342,8 @@ def add_to_chart(article_id):
 @application.route('/remove-from-chart/<article_id>')
 @login_required
 def remove_from_chart(article_id):
-    delete_q = Product.__table__.delete()\
-        .where(Product.stripe_product_id == article_id)\
+    delete_q = Product.__table__.delete() \
+        .where(Product.stripe_product_id == article_id) \
         .where(Product.buyer_id == current_user.id)
     db.session.execute(delete_q)
     db.session.commit()
@@ -367,6 +401,18 @@ def checkout_success():
     delete_q = Product.__table__.delete().where(Product.buyer_id == current_user.id)
     db.session.execute(delete_q)
     db.session.commit()
+    return redirect(url_for('home'))
+
+
+@application.errorhandler(404)
+def page_not_found(e):
+    flash('Requested page was not found', 'danger')
+    return redirect(url_for('home'))
+
+
+@application.errorhandler(405)
+def page_not_found(e):
+    flash('The method is not allowed for the requested URL.', 'danger')
     return redirect(url_for('home'))
 
 

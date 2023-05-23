@@ -82,7 +82,7 @@
         <ul class="navbar-nav ml-auto">
             {% if current_user.is_authenticated %}
             <li class="nav-item my-auto mx-1">
-                <a class="nav-link text-center" href="{{ url_for('profile') }}">
+                <a class="nav-link text-center" href="{{ url_for('profile', user_id=current_user.id) }}">
                     <i class="fa-solid fa-user"></i>
                     <p>Profile</p>
                 </a>
