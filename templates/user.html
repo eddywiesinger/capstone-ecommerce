@@ -20,6 +20,16 @@
             {% endif %}
             {% endwith %}
             <form method="POST">
+                {% if user.confirmed %}
+                <div>
+                    <p>Confirmed account (on: {{ user.confirmed_on.replace(microsecond=0) }}) <i class="fa-solid fa-circle-check" style="color: green;"></i></p>
+                </div>
+                {% else %}
+                <div class="alert alert-warning" role="alert">
+                    <p>Your account is not activated. Please look in your mailbox (and Junk) for the activation email.</p>
+                    <p>E-Mail not received? <a href="{{ url_for('resend_confirmation') }}">Resend confirmation</a>.</p>
+                </div>
+                {% endif %}
                 <div class="form-group">
                     <label for="id">ID</label>
                     <input type="id" class="form-control" id="id" value="{{ user.id }}" readonly>

@@ -129,7 +129,7 @@ footer {
     top: 25%
 }
 
-.chart-count-container {
+.icon-mark-container {
     position: absolute;
     z-index: 1;
     background-color: rgba(183,4, 4, 0.7);
@@ -140,12 +140,17 @@ footer {
 
 }
 
-.chart-count {
+.icon-mark {
     font-family: 'Monda', sans-serif;
     color: #fff;
     font-size: 1rem;
     text-align: center;
-    margin-top: 0.4rem !important;
+    margin-top: 0.45rem !important;
+}
+
+.unconfirmed-icon {
+    color: #fff;
+    font-size: 1rem;
 }
 
 .img-small-display {

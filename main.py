@@ -1,22 +1,24 @@
 import os
 from datetime import datetime
 
-from flask import Flask, render_template, flash, redirect, url_for, request, jsonify
+from flask import Flask, render_template, flash, redirect, url_for, request
 from flask_bootstrap import Bootstrap4
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import BaseConfig
-from decorators import admin_required
+from decorators import admin_required, check_confirmed
 
-import requests
+from activation import generate_confirmation_token, confirm_token
 
 import stripe
 
 # TODO: Set up mailer for account activation
+from mailer import send_email
 
 stripe.api_key = os.environ['STRIPE_SECRET_KEY']
 YOUR_DOMAIN = os.environ['YOUR_DOMAIN']
@@ -35,13 +37,16 @@ login_manager.login_view = "login"
 # DB
 db = SQLAlchemy(application)
 
+# MAIL
+mail = Mail(application)
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-##CONFIGURE TABLES
+# CONFIGURE TABLES
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -134,7 +139,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        # login_user(user)
+        token = generate_confirmation_token(new_user.email)
+        confirm_url = url_for('confirm_email', token=token, _external=True)
+        html = render_template('mail/activate.html', confirm_url=confirm_url)
+        subject = "Please confirm your E-Mail"
+        send_email(new_user.email, subject, html)
 
         flash('Registration successful! Please log in.', 'success')
 
@@ -307,10 +316,50 @@ def delete_article(article_id):
     return redirect(url_for('home'))
 
 
+@application.route('/resend')
+@login_required
+def resend_confirmation():
+    token = generate_confirmation_token(current_user.email)
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    html = render_template('mail/activate.html', confirm_url=confirm_url)
+    subject = "Please confirm your E-Mail"
+    send_email(current_user.email, subject, html)
+    flash('A new activation email was sent to your mailbox.', 'success')
+    return redirect(url_for('unconfirmed'))
+
+
+@application.route('/unconfirmed')
+@login_required
+def unconfirmed():
+    return render_template('error/unconfirmed.html')
+
+
 @application.route('/unauthorized')
 @login_required
 def unauthorized():
     return render_template('error/unauthorized.html')
+
+
+@application.route('/confirm/<token>')
+@login_required
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+    except:
+        flash('The activation link is invalid or expired', 'danger')
+    user = User.query.filter_by(email=email).first_or_404()
+    if email != current_user.email:
+        flash('Wrong account. Redirect abort.', 'danger')
+    elif user.confirmed:
+        flash('Account is already confirmed.', 'success')
+    else:
+        user.confirmed = True
+        user.confirmed_on = datetime.now()
+        # db.session.add(user)
+        db.session.commit()
+        flash('Account was confirmed successfully. Thank you!', 'success')
+        redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 
 @application.route('/users')
@@ -353,6 +402,7 @@ def remove_from_chart(article_id):
 
 @application.route('/checkout', methods=['GET', 'POST'])
 @login_required
+@check_confirmed
 def checkout():
     checkout_products = Product.query.filter_by(buyer_id=current_user.id)
     articles = []
@@ -379,7 +429,7 @@ def checkout():
             checkout_session = stripe.checkout.Session.create(
                 line_items=buy_items,
                 mode='payment',
-                success_url=YOUR_DOMAIN + url_for('checkout_success'),
+                success_url=YOUR_DOMAIN + url_for('checkout_success') + '?session_id={CHECKOUT_SESSION_ID}',
                 cancel_url=YOUR_DOMAIN + url_for('checkout_cancel'),
             )
         except Exception as e:
@@ -390,13 +440,24 @@ def checkout():
 
 
 @application.route('/checkout/cancel')
+@login_required
+@check_confirmed
 def checkout_cancel():
     flash('Checkout was cancelled', 'warning')
     return redirect(url_for('checkout'))
 
 
 @application.route('/checkout/success')
+@login_required
+@check_confirmed
 def checkout_success():
+    if not request.args.get('session_id'):
+        flash('No valid session ID found.', 'danger')
+        return redirect(url_for('home'))
+    session = stripe.checkout.Session.retrieve(request.args.get('session_id'))
+    if not session:
+        flash('No valid session ID found.', 'danger')
+        return redirect(url_for('home'))
     flash('Checkout successful. Thank you for your purchase!', 'success')
     delete_q = Product.__table__.delete().where(Product.buyer_id == current_user.id)
     db.session.execute(delete_q)
