@@ -29,6 +29,7 @@
                     <th scope="col">Email</th>
                     <th scope="col">Admin?</th>
                     <th scope="col">Registered On</th>
+                    <th scope="col">Confirmed</th>
                     <th scope="col"><i class="fa-solid fa-edit"></i></th>
                 </tr>
                 </thead>
@@ -40,6 +41,11 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.is_admin }}</td>
                     <td>{{ user.registered_on.replace(microsecond=0) }}</td>
+                    {% if user.confirmed %}
+                        <td><i class="fa-solid fa-circle-check" style="color: green;"></i></td>
+                    {% else %}
+                        <td><i class="fa-solid fa-circle-xmark" style="color: red;"></i></td>
+                    {% endif %}
                     <td><a href="{{ url_for('profile', user_id=user.id) }}"><i class="fa-solid fa-edit"></i></a></td>
                 </tr>
                 {% endfor %}

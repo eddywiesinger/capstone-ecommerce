@@ -25,10 +25,14 @@
                     <p>Confirmed account (on: {{ user.confirmed_on.replace(microsecond=0) }}) <i class="fa-solid fa-circle-check" style="color: green;"></i></p>
                 </div>
                 {% else %}
-                <div class="alert alert-warning" role="alert">
-                    <p>Your account is not activated. Please look in your mailbox (and Junk) for the activation email.</p>
-                    <p>E-Mail not received? <a href="{{ url_for('resend_confirmation') }}">Resend confirmation</a>.</p>
-                </div>
+                    {% if current_user.id == user.id %}
+                    <div class="alert alert-warning" role="alert">
+                        <p>Your account is not activated. Please look in your mailbox (and Junk) for the activation email.</p>
+                        <p>E-Mail not received? <a href="{{ url_for('resend_confirmation') }}">Resend confirmation</a>.</p>
+                    </div>
+                    {% else %}
+                    <p>Not confirmed <i class="fa-solid fa-circle-xmark" style="color: red;"></i></p>
+                    {% endif %}
                 {% endif %}
                 <div class="form-group">
                     <label for="id">ID</label>

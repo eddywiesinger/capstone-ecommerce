@@ -17,11 +17,9 @@ from activation import generate_confirmation_token, confirm_token
 
 import stripe
 
-# TODO: Set up mailer for account activation
 from mailer import send_email
 
 stripe.api_key = os.environ['STRIPE_SECRET_KEY']
-YOUR_DOMAIN = os.environ['YOUR_DOMAIN']
 
 application = Flask(__name__, static_folder='static')
 application.config.from_object(BaseConfig())
@@ -429,8 +427,8 @@ def checkout():
             checkout_session = stripe.checkout.Session.create(
                 line_items=buy_items,
                 mode='payment',
-                success_url=YOUR_DOMAIN + url_for('checkout_success') + '?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url=YOUR_DOMAIN + url_for('checkout_cancel'),
+                success_url=url_for('checkout_success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=url_for('checkout_cancel', _external=True),
             )
         except Exception as e:
             return str(e)
@@ -491,4 +489,4 @@ def get_active_products():
 
 
 if __name__ == '__main__':
-    application.run(debug=True)
+    application.run()
